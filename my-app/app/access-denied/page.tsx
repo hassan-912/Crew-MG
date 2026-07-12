@@ -35,6 +35,10 @@ const REASONS: Record<string, { heading: string; body: string }> = {
     heading: 'Temporary Error',
     body:    'We were unable to validate your access link right now. Please try again in a few moments.',
   },
+  admin_only: {
+    heading: 'Admin Access Required',
+    body:    'This area is restricted to Crew-MG administrators. If you are an admin, ensure your credentials are correct.',
+  },
 };
 
 const DEFAULT_REASON = {

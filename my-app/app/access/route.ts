@@ -1,26 +1,29 @@
 /**
  * app/access/route.ts
  *
- * GET /access?token=<value>
+ * Safety-net GET handler for /access.
  *
- * This route is the landing page for magic links.  The actual token
- * validation and cookie-setting happens in middleware.ts BEFORE this
- * route handler ever runs.  By the time we reach here, the middleware has
- * either:
- *   a) Validated the token → redirected to /dashboard (with cookie set), OR
- *   b) Rejected the token  → redirected to /access-denied
+ * Under normal operation this handler is NEVER reached for magic links,
+ * because proxy.ts intercepts every /access?token=XYZ request first:
+ *   • Valid token  → proxy sets cookie and redirects to /
+ *   • Invalid/used → proxy redirects to /access-denied
  *
- * This handler therefore only fires when the user navigates to /access
- * WITHOUT a `?token=` param (e.g., bookmarking the page).  We redirect
- * them to the denied page.
+ * This handler only fires in two edge cases:
+ *   1. Someone navigates directly to /access with no ?token= param.
+ *   2. The proxy is bypassed (should not happen in production).
+ *
+ * In both cases we redirect to /access-denied using the request's own
+ * origin so the port number is always correct (no hardcoded localhost).
  */
 
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'edge';
-
-export function GET() {
-  return NextResponse.redirect(new URL('/access-denied', 'http://localhost'), {
-    status: 302,
-  });
+export async function GET(request: NextRequest) {
+  // Derive the redirect URL from the incoming request to preserve
+  // whatever hostname + port the user actually used (127.0.0.1:3000,
+  // localhost:3000, or the production domain).
+  const denied = new URL('/access-denied', request.url);
+  denied.searchParams.set('reason', 'no_session');
+  return NextResponse.redirect(denied, { status: 302 });
 }
+

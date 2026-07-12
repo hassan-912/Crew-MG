@@ -1,13 +1,16 @@
 /**
- * middleware.ts  (project root – next to package.json)
+ * proxy.ts  (project root — replaces middleware.ts, Next.js 16+)
  *
- * Vercel Edge Runtime middleware for Crew-MG single-use link security.
+ * Vercel Edge Runtime proxy for Crew-MG single-use link security.
+ * The "middleware" file convention is deprecated in Next.js 16; this
+ * file uses the new "proxy" convention (function renamed from
+ * `middleware` → `proxy`, file renamed from `middleware.ts` → `proxy.ts`).
  *
  * ─── Flow ────────────────────────────────────────────────────────────────
  *
  *  Request arrives
  *       │
- *       ├─ Path is public (login, access, denied, _next, static)?
+ *       ├─ Path is public (access, denied, admin/*, _next, static)?
  *       │       └─ Pass through immediately
  *       │
  *       ├─ Has valid `crew_session` cookie?
@@ -15,7 +18,7 @@
  *       │
  *       ├─ Has `?token=` query param?
  *       │       ├─ Call Supabase RPC `consume_token` (atomic, single-use)
- *       │       ├─ Valid  → Set HTTP-only session cookie → redirect to /dashboard
+ *       │       ├─ Valid  → Set HTTP-only session cookie → redirect to /
  *       │       └─ Invalid → redirect to /access-denied
  *       │
  *       └─ No session, no token → redirect to /access-denied
@@ -36,14 +39,24 @@ import {
   getSessionCookieOptions,
 } from '@/lib/session';
 
-
+// ---------------------------------------------------------------------------
+// Routes that do NOT require a session
+//
+// NOTE: '/access' is intentionally NOT listed here.
+// The proxy must intercept /access?token=XYZ to validate and consume the
+// token. Listing '/access' as public would skip the proxy entirely, sending
+// the request straight to app/access/route.ts which has no token logic.
+//
+// '/access-denied' MUST stay public to prevent an infinite redirect loop.
+// The /admin route is public here — the AdminLayout Server Component handles
+// its own auth guard.
+// ---------------------------------------------------------------------------
 const PUBLIC_PATHS: Array<string | RegExp> = [
-  '/access',           // token redemption landing page
-  '/access-denied',    // error page
-  '/_next',            // Next.js internals
+  '/access-denied', // error page — must be public to avoid redirect loops
+  '/admin',         // admin interface — protected by its own layout guard
+  '/_next',         // Next.js internals
   '/favicon.ico',
-  '/public',
-  /^\/api\/health/,    // health check endpoint (if any)
+  /^\/api\/health/,
 ];
 
 function isPublicPath(pathname: string): boolean {
@@ -55,9 +68,9 @@ function isPublicPath(pathname: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Middleware entry point
+// Proxy entry point  (was `middleware` in Next.js ≤15)
 // ---------------------------------------------------------------------------
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
   // ── 1. Let public paths through immediately ──────────────────────────────
@@ -71,10 +84,9 @@ export async function middleware(request: NextRequest) {
   if (sessionCookie) {
     const payload = await verifySessionToken(sessionCookie);
     if (payload) {
-      // Valid session → allow through
       return NextResponse.next();
     }
-    // Invalid / expired JWT → fall through to token check or deny
+    // Invalid / expired JWT — fall through to token check or deny
   }
 
   // ── 3. Check for ?token= magic link parameter ───────────────────────────
@@ -95,8 +107,7 @@ async function handleTokenRedemption(
   request: NextRequest,
   rawToken: string
 ): Promise<NextResponse> {
-
-  // Basic format guard – our tokens are URL-safe base64, 43 chars (32 bytes)
+  // Basic format guard — our tokens are URL-safe base64, 43 chars (32 bytes)
   if (!/^[A-Za-z0-9_-]{40,60}$/.test(rawToken)) {
     return redirectToAccessDenied(request, 'invalid_format');
   }
@@ -115,7 +126,7 @@ async function handleTokenRedemption(
       });
 
     if (error) {
-      console.error('[middleware] Supabase RPC error:', error.message);
+      console.error('[proxy] Supabase RPC error:', error.message);
       return redirectToAccessDenied(request, 'server_error');
     }
 
@@ -135,7 +146,7 @@ async function handleTokenRedemption(
       recipient: tokenRow.recipient ?? undefined,
     });
 
-    // ── Build redirect to the protected dashboard ──────────────────────
+    // ── Redirect to the protected dashboard ───────────────────────────
     const dashboardUrl = new URL('/', request.url);
     const response = NextResponse.redirect(dashboardUrl, { status: 302 });
 
@@ -144,9 +155,8 @@ async function handleTokenRedemption(
     response.cookies.set(SESSION_COOKIE_NAME, sessionJwt, cookieOpts);
 
     return response;
-
   } catch (err) {
-    console.error('[middleware] Token redemption error:', err);
+    console.error('[proxy] Token redemption error:', err);
     return redirectToAccessDenied(request, 'server_error');
   }
 }
@@ -164,7 +174,6 @@ function redirectToAccessDenied(
 }
 
 function getClientIp(request: NextRequest): string {
-  // Vercel injects the real client IP in this header
   return (
     request.headers.get('x-real-ip') ??
     request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
@@ -173,17 +182,10 @@ function getClientIp(request: NextRequest): string {
 }
 
 // ---------------------------------------------------------------------------
-// Matcher – apply middleware to everything EXCEPT static assets
+// Matcher — apply proxy to everything EXCEPT static assets
 // ---------------------------------------------------------------------------
 export const config = {
   matcher: [
-    /*
-     * Match all request paths EXCEPT:
-     *   - _next/static  (static files)
-     *   - _next/image   (image optimisation)
-     *   - favicon.ico
-     *   - Files with extensions (.png, .jpg, .svg, .css, .js …)
-     */
     '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico|css|js|woff2?|ttf|eot)$).*)',
   ],
 };
