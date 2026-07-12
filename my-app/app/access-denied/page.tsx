@@ -65,17 +65,13 @@ export default async function AccessDeniedPage({ searchParams }: Props) {
         textAlign:       'center',
       }}
     >
-      {/* Icon */}
-      <div
-        aria-hidden
-        style={{
-          fontSize:    '4rem',
-          lineHeight:  1,
-          marginBottom: '1.5rem',
-          filter: 'drop-shadow(0 0 12px rgba(248, 113, 113, 0.6))',
-        }}
-      >
-        🔒
+      {/* Logo */}
+      <div className="mb-6" aria-hidden>
+        <img 
+          src="/MG%20W.svg" 
+          alt="Crew-MG Logo" 
+          className="h-16 w-auto object-contain mx-auto drop-shadow-lg"
+        />
       </div>
 
       {/* Heading */}

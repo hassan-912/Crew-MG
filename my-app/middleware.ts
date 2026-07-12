@@ -28,7 +28,7 @@
  */
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { createEdgeAdminClient }           from '@/lib/supabase/edge';
+import { createEdgeAdminClient } from '@/lib/supabase/edge';
 import {
   createSessionToken,
   verifySessionToken,
@@ -36,14 +36,7 @@ import {
   getSessionCookieOptions,
 } from '@/lib/session';
 
-// ---------------------------------------------------------------------------
-// Runtime declaration – required for Vercel Edge
-// ---------------------------------------------------------------------------
-export const runtime = 'edge';
 
-// ---------------------------------------------------------------------------
-// Routes that do NOT require a session
-// ---------------------------------------------------------------------------
 const PUBLIC_PATHS: Array<string | RegExp> = [
   '/access',           // token redemption landing page
   '/access-denied',    // error page
@@ -109,15 +102,15 @@ async function handleTokenRedemption(
   }
 
   try {
-    const supabase  = createEdgeAdminClient();
-    const clientIp  = getClientIp(request);
+    const supabase = createEdgeAdminClient();
+    const clientIp = getClientIp(request);
 
     // Call the atomic `consume_token` database function.
     // It performs SELECT … FOR UPDATE + UPDATE in a single transaction,
     // guaranteeing that concurrent requests cannot both succeed.
     const { data, error } = await supabase
       .rpc('consume_token', {
-        p_token:     rawToken,
+        p_token: rawToken,
         p_client_ip: clientIp,
       });
 
@@ -132,19 +125,19 @@ async function handleTokenRedemption(
     }
 
     const tokenRow = data[0] as {
-      id:        string;
+      id: string;
       recipient: string | null;
     };
 
     // ── Create signed session JWT ──────────────────────────────────────
     const sessionJwt = await createSessionToken({
-      sub:       tokenRow.id,
+      sub: tokenRow.id,
       recipient: tokenRow.recipient ?? undefined,
     });
 
     // ── Build redirect to the protected dashboard ──────────────────────
-    const dashboardUrl = new URL('/dashboard', request.url);
-    const response     = NextResponse.redirect(dashboardUrl, { status: 302 });
+    const dashboardUrl = new URL('/', request.url);
+    const response = NextResponse.redirect(dashboardUrl, { status: 302 });
 
     // ── Set the HTTP-only session cookie ──────────────────────────────
     const cookieOpts = getSessionCookieOptions();
@@ -162,8 +155,8 @@ async function handleTokenRedemption(
 // Helpers
 // ---------------------------------------------------------------------------
 function redirectToAccessDenied(
-  request:  NextRequest,
-  reason:   string
+  request: NextRequest,
+  reason: string
 ): NextResponse {
   const url = new URL('/access-denied', request.url);
   url.searchParams.set('reason', reason);
@@ -173,7 +166,7 @@ function redirectToAccessDenied(
 function getClientIp(request: NextRequest): string {
   // Vercel injects the real client IP in this header
   return (
-    request.headers.get('x-real-ip')           ??
+    request.headers.get('x-real-ip') ??
     request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
     'unknown'
   );
