@@ -2,18 +2,36 @@
 
 import { useState } from "react";
 import {
-  Shield, Hotel, Plane, Globe, FileText, CheckCircle2, Clock,
+  Shield, Hotel, Plane, Globe, FileText, CheckCircle2,
   ChevronRight, ExternalLink, Play, BookOpen, Map,
-  ListOrdered, Layers, FileDown, Link2, BarChart2, Building2,
-  GraduationCap,
+  ListOrdered, Layers, FileDown, Link2, Building2,
+  GraduationCap, ArrowLeft, Timer, Film, MapPin,
 } from "lucide-react";
 import { COUNTRIES, type CountryData, type QuickLink } from "./countryData";
 
-// ─── Basics data (component refs — no JSX at module scope) ───────────────────
+// ─── Gradient palette per country id / accent ─────────────────────────────────
+
+const COUNTRY_GRADIENT: Record<string, string> = {
+  spain:       "from-red-500 via-yellow-400 to-red-600",
+  france:      "from-blue-600 via-indigo-500 to-blue-800",
+  germany:     "from-slate-800 via-slate-700 to-yellow-500",
+  italy:       "from-green-500 via-white to-red-500",
+  netherlands: "from-orange-500 via-white to-blue-700",
+};
+
+const BASICS_GRADIENT: Record<string, string> = {
+  insurance: "from-violet-500 via-purple-500 to-indigo-600",
+  hotel:     "from-sky-500 via-cyan-400 to-blue-600",
+  flight:    "from-emerald-500 via-teal-400 to-green-600",
+};
+
+// ─── Basics data ──────────────────────────────────────────────────────────────
+
 const BASICS = [
   {
     id: "insurance", title: "Travel Insurance", accent: "violet", Icon: Shield,
     links: [{ label: "EPTI", url: "https://epti-egy.org/Traveltargetweb/Pages/Policy_Qry2/Default.aspx" }],
+    video: { url: "", thumbnail: "" },
   },
   {
     id: "hotel", title: "Hotel Booking", accent: "sky", Icon: Hotel,
@@ -23,6 +41,7 @@ const BASICS = [
       { label: "Expedia", url: "https://www.expedia.com/Hotels?locale=en_US&siteid=4406" },
       { label: "ALL.Accor", url: "https://all.accor.com/a/en.html" },
     ],
+    video: { url: "", thumbnail: "" },
   },
   {
     id: "flight", title: "Flight Booking", accent: "emerald", Icon: Plane,
@@ -30,6 +49,7 @@ const BASICS = [
       { label: "Flyin", url: "https://eg.flyin.com/en" },
       { label: "EgyptAir", url: "https://www.egyptair.com/en/Pages/HomePage.aspx" },
     ],
+    video: { url: "", thumbnail: "" },
   },
 ];
 
@@ -39,28 +59,260 @@ const ACCENT: Record<string, { card: string; icon: string }> = {
   emerald: { card: "from-emerald-50 to-teal-50 border-emerald-100", icon: "bg-emerald-100 text-emerald-600"},
 };
 
-// ─── Shared components ────────────────────────────────────────────────────────
+// ─── UdemyCard ────────────────────────────────────────────────────────────────
+// A fully reusable Udemy-style card: media top, title middle, tags bottom.
 
-function VideoPlaceholder({ title }: { title: string }) {
+interface UdemyCardTag {
+  label: string;
+  icon?: React.ElementType;
+}
+
+interface UdemyCardProps {
+  /** Rendered inside the top media block */
+  media: React.ReactNode;
+  /** Card headline */
+  title: React.ReactNode;
+  /** Optional subtitle below the title */
+  subtitle?: string;
+  /** Info tags rendered in the card footer */
+  tags: UdemyCardTag[];
+  /** Click handler for the whole card */
+  onClick?: () => void;
+  /** Extra classes on the outer wrapper */
+  className?: string;
+}
+
+function UdemyCard({ media, title, subtitle, tags, onClick, className = "" }: UdemyCardProps) {
   return (
-    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/60 flex flex-col items-center justify-center gap-3 group cursor-pointer">
-      <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px)", backgroundSize: "32px 32px" }} />
-      <div className="relative z-10 flex flex-col items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-all duration-300 group-hover:scale-110">
-          <Play size={22} className="text-white ml-1" />
+    <div
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => e.key === "Enter" && onClick() : undefined}
+      onClick={onClick}
+      className={`
+        flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden
+        hover:shadow-xl hover:-translate-y-1 transition-all duration-300
+        ${onClick ? "cursor-pointer" : ""}
+        ${className}
+      `}
+    >
+      {/* ── Top: Media ─────────────────────────────────────── */}
+      <div className="w-full aspect-video overflow-hidden">
+        {media}
+      </div>
+
+      {/* ── Middle: Title ──────────────────────────────────── */}
+      <div className="p-5 flex-1 flex flex-col justify-center">
+        <h3 className="text-base font-extrabold text-slate-900 leading-snug line-clamp-2">{title}</h3>
+        {subtitle && <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">{subtitle}</p>}
+      </div>
+
+      {/* ── Bottom: Tags ───────────────────────────────────── */}
+      <div className="px-5 pb-5 pt-0 border-t border-slate-100">
+        <div className="flex flex-wrap gap-2 pt-4">
+          {tags.map((tag, i) => {
+            const TagIcon = tag.icon;
+            return (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full"
+              >
+                {TagIcon && <TagIcon size={11} className="text-slate-400 flex-shrink-0" />}
+                {tag.label}
+              </span>
+            );
+          })}
         </div>
-        <p className="text-slate-300 text-xs font-medium text-center px-4 leading-snug">{title}</p>
-        <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">Video coming soon</span>
       </div>
     </div>
   );
 }
 
-function SectionCard({ icon, title, subtitle, children }: { icon: React.ReactNode; title: string; subtitle?: string; children: React.ReactNode }) {
+// ─── Country gradient media block ─────────────────────────────────────────────
+
+function CountryMediaBlock({ country }: { country: CountryData }) {
+  const gradient = COUNTRY_GRADIENT[country.id] ?? "from-indigo-500 to-purple-600";
+  return (
+    <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center relative overflow-hidden`}>
+      {/* Subtle grid pattern */}
+      <div
+        className="absolute inset-0 opacity-10"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+      <span className="relative z-10 text-8xl drop-shadow-2xl select-none">{country.flag}</span>
+    </div>
+  );
+}
+
+// ─── VideoPlayer — renders real video or a styled placeholder ─────────────────
+
+function VideoPlayer({
+  url,
+  thumbnail,
+  title,
+  index = 0,
+}: {
+  url: string;
+  thumbnail: string;
+  title: string;
+  index?: number;
+}) {
+  if (url) {
+    // ── Real video: poster shows thumbnail until play is pressed ────────────
+    return (
+      <video
+        src={url}
+        poster={thumbnail || undefined}
+        controls
+        preload="metadata"
+        className="w-full aspect-video rounded-xl object-cover border border-slate-200"
+      />
+    );
+  }
+
+  // ── Placeholder: thumbnail as blurred bg if available, else dark gradient ──
+  const tints = [
+    "from-slate-900 via-slate-800 to-indigo-950",
+    "from-slate-900 via-slate-800 to-violet-950",
+    "from-slate-900 via-slate-800 to-blue-950",
+  ];
+
+  return (
+    <div
+      className="w-full aspect-video rounded-xl overflow-hidden relative border border-slate-700/60 group flex flex-col items-center justify-center gap-3"
+      style={
+        thumbnail
+          ? { backgroundImage: `url(${thumbnail})`, backgroundSize: "cover", backgroundPosition: "center" }
+          : undefined
+      }
+    >
+      {/* Dark overlay (solid if no thumbnail, semi-transparent if thumbnail) */}
+      <div
+        className={`absolute inset-0 ${
+          thumbnail
+            ? "bg-black/55"
+            : `bg-gradient-to-br ${tints[index % tints.length]}`
+        }`}
+      />
+      {/* Grid lines (only when no thumbnail) */}
+      {!thumbnail && (
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+      )}
+      <div className="relative z-10 flex flex-col items-center gap-3">
+        <div className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/25 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300 shadow-xl">
+          <Play size={24} className="text-white ml-1" />
+        </div>
+        <p className="text-slate-200 text-xs font-medium text-center px-6 leading-snug drop-shadow">{title}</p>
+        <span className="text-xs text-slate-400 bg-black/50 px-2.5 py-1 rounded-full border border-white/10">
+          Video coming soon
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Basics gradient media block ──────────────────────────────────────────────
+
+function BasicsMediaBlock({ id }: { id: string }) {
+  const gradient = BASICS_GRADIENT[id] ?? "from-indigo-500 to-purple-600";
+  const card = BASICS.find((b) => b.id === id);
+  return (
+    <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center gap-2 relative overflow-hidden group`}>
+      <div
+        className="absolute inset-0 opacity-10"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+      {/* Play overlay */}
+      <div className="relative z-10 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/25 group-hover:bg-white/25 group-hover:scale-110 transition-all duration-300 shadow-xl">
+        <Play size={20} className="text-white ml-1" />
+      </div>
+      {card && (
+        <span className="relative z-10 text-white/80 text-xs font-semibold tracking-wide uppercase">
+          {card.title}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// ─── Country Grid (Home view) ─────────────────────────────────────────────────
+
+function CountryGrid({ setActiveView }: { setActiveView: (v: string) => void }) {
+  return (
+    <div className="space-y-6">
+      {/* Section header */}
+      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+          <Globe size={20} className="text-indigo-600" />
+        </div>
+        <div>
+          <h2 className="font-bold text-indigo-900 text-base">Country Visa Guides</h2>
+          <p className="text-indigo-700 text-sm mt-1 leading-relaxed">
+            Select a destination to view the complete visa application guide, required documents, and video walkthroughs.
+          </p>
+        </div>
+      </div>
+
+      {/* Card grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {COUNTRIES.map((country) => (
+          <UdemyCard
+            key={country.id}
+            onClick={() => setActiveView(country.id)}
+            media={<CountryMediaBlock country={country} />}
+            title={
+              <span className="flex items-center gap-2">
+                <span className="text-xl">{country.flag}</span>
+                <span>{country.name}</span>
+              </span>
+            }
+            subtitle={`Everything you need to apply for a Schengen visa via ${country.agency}.`}
+            tags={[
+              { label: country.agency, icon: Building2 },
+              { label: country.locations.map((l) => l.city).join(" · "), icon: MapPin },
+              { label: `${country.requiredDocs.length} Documents`, icon: FileText },
+            ]}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Shared components ────────────────────────────────────────────────────────
+
+function SectionCard({
+  icon,
+  title,
+  subtitle,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">{icon}</div>
+        <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
+          {icon}
+        </div>
         <div>
           <h3 className="text-base font-bold text-slate-800">{title}</h3>
           {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
@@ -73,42 +325,75 @@ function SectionCard({ icon, title, subtitle, children }: { icon: React.ReactNod
 
 // ─── Basics content ───────────────────────────────────────────────────────────
 
-function BasicCard({ card }: { card: (typeof BASICS)[0] }) {
-  return (
-    <div className={`flex flex-col rounded-2xl border bg-gradient-to-br ${ACCENT[card.accent].card} p-5 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${ACCENT[card.accent].icon}`}>
-          <card.Icon size={22} />
-        </div>
-        <h3 className="font-semibold text-slate-800">{card.title}</h3>
-      </div>
-      <VideoPlaceholder title={`How to book ${card.title.toLowerCase()} step-by-step`} />
-      <div className="mt-4 flex flex-wrap gap-2">
-        {card.links.map((l) => (
-          <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 group">
-            <ExternalLink size={11} className="text-slate-400 group-hover:text-slate-600" />{l.label}
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function BasicsContent() {
   return (
-    <div>
-      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 mb-8 flex items-start gap-4">
+    <div className="space-y-6">
+      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 flex items-start gap-4">
         <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
           <Layers size={20} className="text-indigo-600" />
         </div>
         <div>
           <h2 className="font-bold text-indigo-900 text-base">Common Tasks — All Schengen Countries</h2>
-          <p className="text-indigo-700 text-sm mt-1 leading-relaxed">Complete these steps first. They apply identically regardless of your destination country.</p>
+          <p className="text-indigo-700 text-sm mt-1 leading-relaxed">
+            Complete these steps first. They apply identically regardless of your destination country.
+          </p>
         </div>
       </div>
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {BASICS.map((card) => <BasicCard key={card.id} card={card} />)}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {BASICS.map((card, i) => (
+          <div key={card.id} className="flex flex-col gap-3">
+            {/* Card title */}
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{card.title}</p>
+            {/* Smart video player or placeholder */}
+            <VideoPlayer
+              url={card.video.url}
+              thumbnail={card.video.thumbnail}
+              title={`How to book ${card.title.toLowerCase()} step-by-step`}
+              index={i}
+            />
+            {/* Status tags */}
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+                <Film size={11} className="text-slate-400" />Tutorial
+              </span>
+              {card.video.url ? (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                  <Play size={11} className="text-emerald-500" />Ready to watch
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full">
+                  <Play size={11} className="text-slate-300" />Video coming soon
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Booking links below the cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {BASICS.map((card) => (
+          <div key={card.id + "-links"} className="bg-white border border-slate-200 rounded-xl p-4">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+              <ExternalLink size={11} /> Quick links — {card.title}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {card.links.map((l) => (
+                <a
+                  key={l.label}
+                  href={l.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 group"
+                >
+                  <ExternalLink size={11} className="text-slate-400 group-hover:text-indigo-500" />
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -128,34 +413,59 @@ const QUICK_STYLE: Record<QuickLink["icon"], string> = {
 function QuickActionButton({ link }: { link: QuickLink }) {
   const IconCmp = QUICK_ICON_CMP[link.icon];
   return (
-    <a href={link.url} target="_blank" rel="noopener noreferrer"
-      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${QUICK_STYLE[link.icon]}`}>
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${QUICK_STYLE[link.icon]}`}
+    >
       <IconCmp size={15} />{link.label}
     </a>
   );
 }
 
-function ProcessingImagePlaceholder() {
-  return (
-    <div className="w-full rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 flex flex-col items-center justify-center gap-3 py-10">
-      <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center">
-        <BarChart2 size={32} className="text-amber-500" />
-      </div>
-      <p className="text-amber-700 text-sm font-semibold">Processing Timeline Infographic</p>
-      <span className="text-xs text-amber-500 bg-amber-100 px-3 py-1 rounded-full border border-amber-200">Chart coming soon</span>
-    </div>
-  );
-}
 
-function CountryContent({ country }: { country: CountryData }) {
+
+function CountryContent({
+  country,
+  onBack,
+}: {
+  country: CountryData;
+  onBack: () => void;
+}) {
   const videos = [
-    `${country.name} — How to fill the Visa Application Form`,
-    `${country.name} — How to write a Motivation Letter`,
-    `${country.name} — How to create a Travel Plan`,
+    {
+      title: `How to fill the Visa Application Form`,
+      subtitle: `Step-by-step walkthrough for the official ${country.name} Schengen form.`,
+      url:       country.videos.form.url,
+      thumbnail: country.videos.form.thumbnail,
+    },
+    {
+      title: `How to write a Motivation Letter`,
+      subtitle: `Tips on framing your travel purpose and convincing the consulate.`,
+      url:       country.videos.motivation.url,
+      thumbnail: country.videos.motivation.thumbnail,
+    },
+    {
+      title: `How to create a Travel Plan`,
+      subtitle: `Building a day-by-day itinerary that matches your visa request.`,
+      url:       country.videos.itinerary.url,
+      thumbnail: country.videos.itinerary.thumbnail,
+    },
   ];
 
   return (
     <div className="space-y-6">
+      {/* ← Back button */}
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 px-4 py-2 rounded-xl transition-all duration-200"
+      >
+        <ArrowLeft size={15} />
+        Back to All Courses
+      </button>
+
       {/* Country header */}
       <div className="flex flex-wrap items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
         <span className="text-5xl">{country.flag}</span>
@@ -168,84 +478,145 @@ function CountryContent({ country }: { country: CountryData }) {
           </div>
           <p className="text-slate-500 text-sm">Everything you need to apply for a Schengen visa via {country.agency}.</p>
         </div>
-        <div className="hidden lg:flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-          <Clock size={18} className="text-amber-600" />
-          <div>
-            <p className="text-xs text-amber-600 font-semibold uppercase tracking-wide">Processing Time</p>
-            <p className="font-bold text-slate-800">{country.processingTime}</p>
-          </div>
+        <div className="hidden lg:flex items-center gap-2 flex-wrap">
+          {country.locations.map((loc) => (
+            <a
+              key={loc.city}
+              href={loc.mapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all duration-200"
+            >
+              <MapPin size={11} />{loc.city}
+            </a>
+          ))}
         </div>
       </div>
 
-      {/* Row 1: Quick Actions | Processing Time */}
+      {/* Row 1: Quick Actions | Agency Locations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SectionCard icon={<ExternalLink size={18} />} title="Quick Actions" subtitle="Official links for this embassy">
           <div className="flex flex-col gap-3">
-            {country.quickLinks.map((l) => <QuickActionButton key={l.label} link={l} />)}
+            {country.quickLinks.map((l) => (
+              <QuickActionButton key={l.label} link={l} />
+            ))}
           </div>
         </SectionCard>
-        <SectionCard icon={<Clock size={18} />} title="Processing Time" subtitle="Standard embassy timeline">
-          <div className="flex items-start gap-4 bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <Clock size={20} className="text-amber-600" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-0.5">Typical Duration</p>
-              <p className="text-slate-800 font-bold text-lg leading-tight">{country.processingTime}</p>
-              <p className="text-slate-500 text-xs mt-1 leading-snug">{country.processingNote}</p>
-            </div>
+        <SectionCard icon={<MapPin size={18} />} title="Agency Locations" subtitle="Where to submit your application in Egypt">
+          <div className="flex flex-wrap gap-3">
+            {country.locations.map((loc) => (
+              <a
+                key={loc.city}
+                href={loc.mapUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 hover:bg-indigo-600 hover:border-indigo-600 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+              >
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 border border-indigo-200 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 group-hover:border-white/30 transition-colors">
+                  <MapPin size={15} className="text-indigo-600 group-hover:text-white transition-colors" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-indigo-900 group-hover:text-white transition-colors">{loc.city}</p>
+                  <p className="text-xs text-indigo-500 group-hover:text-indigo-100 transition-colors flex items-center gap-1">
+                    {country.agency} · Open in Maps
+                  </p>
+                </div>
+              </a>
+            ))}
           </div>
-          <ProcessingImagePlaceholder />
         </SectionCard>
       </div>
 
-      {/* Row 2: 3 Video Tutorials */}
-      <SectionCard icon={<Globe size={18} />} title="Video Tutorials" subtitle="Watch all three before your appointment">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {videos.map((t) => (
-            <div key={t}>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 truncate">{t.split("— ")[1]}</p>
-              <VideoPlaceholder title={t} />
+      {/* Row 2: Video Tutorials */}
+      <SectionCard
+        icon={<Globe size={18} />}
+        title="Video Tutorials"
+        subtitle="Watch all three before your appointment"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {videos.map((video, i) => (
+            <div key={video.title} className="flex flex-col gap-3">
+              {/* Title above the player */}
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider truncate">
+                {video.title}
+              </p>
+              {/* Smart player: real video or placeholder */}
+              <VideoPlayer url={video.url} thumbnail={video.thumbnail} title={video.title} index={i} />
+              {/* Tags row */}
+              <div className="flex flex-wrap gap-2">
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+                  <Timer size={11} className="text-slate-400" />~10 mins
+                </span>
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+                  <CheckCircle2 size={11} className="text-slate-400" />Required
+                </span>
+                {video.url ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                    <Play size={11} className="text-emerald-500" />Ready to watch
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full">
+                    <Film size={11} className="text-slate-300" />Video coming soon
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>
       </SectionCard>
 
-      {/* Row 3: Required Docs | Arrangement */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SectionCard icon={<FileText size={18} />} title="Required Documents" subtitle={`${country.requiredDocs.length} items to prepare`}>
-          <div className="space-y-2">
-            {country.requiredDocs.map((doc, i) => (
-              <div key={i} className="flex items-start gap-3 bg-white border border-slate-100 rounded-xl px-4 py-2.5 hover:border-emerald-200 hover:bg-emerald-50/30 transition-colors group">
-                <CheckCircle2 size={15} className="text-emerald-500 mt-0.5 flex-shrink-0 group-hover:text-emerald-600" />
-                <span className="text-sm text-slate-700 leading-snug">{doc}</span>
+      {/* Row 3: Required Docs — full width horizontal grid */}
+      <SectionCard
+        icon={<FileText size={18} />}
+        title="Required Documents"
+        subtitle={`${country.requiredDocs.length} items to prepare`}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {country.requiredDocs.map((doc, i) => (
+            <div key={i} className="flex items-start gap-3 bg-white border border-slate-100 rounded-xl px-4 py-3 hover:border-emerald-200 hover:bg-emerald-50/30 transition-colors group">
+              <CheckCircle2 size={15} className="text-emerald-500 mt-0.5 flex-shrink-0 group-hover:text-emerald-600" />
+              <span className="text-sm text-slate-700 leading-snug">{doc}</span>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      {/* Row 4: Submission Order — full width horizontal grid */}
+      <SectionCard
+        icon={<ListOrdered size={18} />}
+        title="Submission Order"
+        subtitle="Stack papers in this exact order"
+      >
+        <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl p-3 mb-4">
+          <ChevronRight size={13} className="text-indigo-500 flex-shrink-0" />
+          <p className="text-xs text-indigo-700 font-medium">Document #1 goes on top; each one underneath the previous.</p>
+        </div>
+        <ol className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {country.arrangement.map((step, i) => (
+            <li key={i} className="flex items-start gap-3 bg-white border border-slate-100 rounded-xl px-4 py-3 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors group">
+              <div className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                {i + 1}
               </div>
-            ))}
-          </div>
-        </SectionCard>
-        <SectionCard icon={<ListOrdered size={18} />} title="Submission Order" subtitle="Stack papers in this exact order">
-          <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl p-3 mb-3">
-            <ChevronRight size={13} className="text-indigo-500 flex-shrink-0" />
-            <p className="text-xs text-indigo-700 font-medium">Document #1 goes on top; each one underneath the previous.</p>
-          </div>
-          <ol className="space-y-2">
-            {country.arrangement.map((step, i) => (
-              <li key={i} className="flex items-start gap-3 bg-white border border-slate-100 rounded-xl px-4 py-2.5 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors group">
-                <div className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-indigo-600 group-hover:text-white transition-colors">{i + 1}</div>
-                <span className="text-sm text-slate-700 leading-snug">{step}</span>
-              </li>
-            ))}
-          </ol>
-        </SectionCard>
-      </div>
+              <span className="text-sm text-slate-700 leading-snug">{step}</span>
+            </li>
+          ))}
+        </ol>
+      </SectionCard>
     </div>
   );
 }
 
-// ─── LMS Sidebar ─────────────────────────────────────────────────────────────
+// ─── LMS Sidebar ──────────────────────────────────────────────────────────────
 
-function Sidebar({ activeView, setActiveView }: { activeView: string; setActiveView: (v: string) => void }) {
+function Sidebar({
+  activeView,
+  setActiveView,
+}: {
+  activeView: string;
+  setActiveView: (v: string) => void;
+}) {
   const isBasics = activeView === "basics";
+  const isHome   = activeView === "home";
 
   return (
     <nav className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -283,6 +654,24 @@ function Sidebar({ activeView, setActiveView }: { activeView: string; setActiveV
       {/* Section 2: Country Guides */}
       <div className="p-3">
         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 py-2">Module 2 — Country Guides</p>
+
+        {/* "All Countries" card grid button */}
+        <button
+          type="button"
+          onClick={() => setActiveView("home")}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 mb-1 ${
+            isHome
+              ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30"
+              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+          }`}
+        >
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${isHome ? "bg-white/20" : "bg-indigo-100"}`}>
+            <Globe size={14} className={isHome ? "text-white" : "text-indigo-600"} />
+          </div>
+          <span className="text-left">All Countries</span>
+          {isHome && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />}
+        </button>
+
         <div className="space-y-1">
           {COUNTRIES.map((c) => {
             const isActive = activeView === c.id;
@@ -317,7 +706,8 @@ function Sidebar({ activeView, setActiveView }: { activeView: string; setActiveV
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function SchengenDashboard() {
-  const [activeView, setActiveView] = useState<string>("basics");
+  // Default to the new country-grid home view
+  const [activeView, setActiveView] = useState<string>("home");
 
   const activeCountry = COUNTRIES.find((c) => c.id === activeView) ?? null;
 
@@ -359,8 +749,13 @@ export default function SchengenDashboard() {
             {activeView === "basics" ? (
               <BasicsContent />
             ) : activeCountry ? (
-              <CountryContent country={activeCountry} />
-            ) : null}
+              <CountryContent
+                country={activeCountry}
+                onBack={() => setActiveView("home")}
+              />
+            ) : (
+              <CountryGrid setActiveView={setActiveView} />
+            )}
           </main>
 
         </div>

@@ -1,9 +1,13 @@
 export interface QuickLink { label: string; url: string; icon: "list" | "portal" | "pdf" }
+export interface Location { city: string; mapUrl: string; }
+export interface VideoEntry { url: string; thumbnail: string; }
+export interface Videos { form: VideoEntry; motivation: VideoEntry; itinerary: VideoEntry; }
 export interface CountryData {
   id: string; name: string; flag: string;
   agency: string; agencyColor: string;
   quickLinks: QuickLink[];
-  processingTime: string; processingNote: string;
+  locations: Location[];
+  videos: Videos;
   requiredDocs: string[];
   arrangement: string[];
 }
@@ -17,8 +21,15 @@ export const COUNTRIES: CountryData[] = [
       { label: "BLS Application Portal", url: "https://egypt.blsspainvisa.com/tourist-visit.php", icon: "portal" },
       { label: "Download Application PDF", url: "https://www.exteriores.gob.es/DocumentosAuxiliaresSC/Egipto/MODELO%20SOLICITUD%20VISADO%20SCHENGEN%20EN.pdf", icon: "pdf" },
     ],
-    processingTime: "15 – 45 Working Days",
-    processingNote: "Apply at BLS International Egypt. Submit at least 3 weeks before travel. Appointments are mandatory and booked online.",
+    locations: [
+      { city: "Cairo", mapUrl: "https://www.google.com/maps/search/BLS+International+Spain+Visa+Cairo+Egypt" },
+      { city: "Alexandria", mapUrl: "https://www.google.com/maps/search/BLS+International+Spain+Visa+Alexandria+Egypt" },
+    ],
+    videos: {
+      form:       { url: "https://ljnobjopqfzalwuvjsub.supabase.co/storage/v1/object/public/training-video/aman.mp4", thumbnail: "" },
+      motivation: { url: "", thumbnail: "" },
+      itinerary:  { url: "", thumbnail: "" },
+    },
     requiredDocs: [
       "Valid Passport (6+ months validity, 2 blank pages)",
       "Two recent passport photos (white background, 3.5 × 4.5 cm)",
@@ -51,8 +62,15 @@ export const COUNTRIES: CountryData[] = [
       { label: "France-Visas Portal", url: "https://france-visas.gouv.fr/en_US/web/france-visas", icon: "portal" },
       { label: "Download Application PDF", url: "https://france-visas.gouv.fr/documents/10180/12635/formulaire_court_sejour_en.pdf", icon: "pdf" },
     ],
-    processingTime: "10 – 15 Working Days",
-    processingNote: "Apply via TLScontact Cairo. Online appointment is mandatory. Apply no earlier than 6 months and no later than 15 days before travel.",
+    locations: [
+      { city: "Cairo", mapUrl: "https://www.google.com/maps/search/TLScontact+France+Visa+Cairo+Egypt" },
+      { city: "Alexandria", mapUrl: "https://www.google.com/maps/search/TLScontact+France+Visa+Alexandria+Egypt" },
+    ],
+    videos: {
+      form:       { url: "", thumbnail: "" },
+      motivation: { url: "", thumbnail: "" },
+      itinerary:  { url: "", thumbnail: "" },
+    },
     requiredDocs: [
       "Valid Passport (3+ months beyond stay, 2 blank pages)",
       "Completed & signed visa application form",
@@ -84,8 +102,15 @@ export const COUNTRIES: CountryData[] = [
       { label: "VIDEX Online Application", url: "https://videx.diplo.de/videx/visum-erfassung/de/videx-kurzfristiger-aufenthalt", icon: "portal" },
       { label: "Download Application PDF", url: "https://cairo.diplo.de/blob/2291040/d5a214c44a13da38fa47a4a95e87fd4d/antrag-schengenvisum-data.pdf", icon: "pdf" },
     ],
-    processingTime: "10 – 15 Working Days",
-    processingNote: "Apply via TLScontact Cairo. Book appointment early — slots fill fast. Submit at least 6 weeks before travel for peak seasons.",
+    locations: [
+      { city: "Cairo", mapUrl: "https://www.google.com/maps/search/TLScontact+Germany+Visa+Cairo+Egypt" },
+      { city: "Alexandria", mapUrl: "https://www.google.com/maps/search/TLScontact+Germany+Visa+Alexandria+Egypt" },
+    ],
+    videos: {
+      form:       { url: "", thumbnail: "" },
+      motivation: { url: "", thumbnail: "" },
+      itinerary:  { url: "", thumbnail: "" },
+    },
     requiredDocs: [
       "Valid Passport (6+ months validity, 2 blank pages)",
       "Completed Schengen Visa Application Form",
@@ -119,8 +144,15 @@ export const COUNTRIES: CountryData[] = [
       { label: "Almaviva Application Portal", url: "https://egy.almaviva-visa.it/", icon: "portal" },
       { label: "Download Application PDF", url: "https://vistoperitalia.esteri.it/content/pdf/Modulo%20Domanda%20Visto%20Schengen%20EN.pdf", icon: "pdf" },
     ],
-    processingTime: "10 – 15 Working Days",
-    processingNote: "Apply via VFS Global or Almaviva Egypt. Tourist visa times may vary in peak summer season. Early submission strongly advised.",
+    locations: [
+      { city: "Cairo", mapUrl: "https://www.google.com/maps/search/Almaviva+Italy+Visa+Cairo+Egypt" },
+      { city: "Alexandria", mapUrl: "https://www.google.com/maps/search/Almaviva+VFS+Italy+Visa+Alexandria+Egypt" },
+    ],
+    videos: {
+      form:       { url: "", thumbnail: "" },
+      motivation: { url: "", thumbnail: "" },
+      itinerary:  { url: "", thumbnail: "" },
+    },
     requiredDocs: [
       "Valid Passport (3+ months beyond return date)",
       "Completed and signed Schengen Visa application",
@@ -155,8 +187,15 @@ export const COUNTRIES: CountryData[] = [
       { label: "Netherlands Apply Portal", url: "https://www.netherlandsworldwide.nl/visa-the-netherlands/schengen-visa/apply-egypt", icon: "portal" },
       { label: "Download Application PDF", url: "https://www.netherlandsworldwide.nl/binaries/netherlandsworldwide/documents/forms/2019/01/01/schengen-visa-application-form/schengen_application_form_english.pdf", icon: "pdf" },
     ],
-    processingTime: "15 Working Days",
-    processingNote: "Apply via VFS Global Egypt. Digital appointment booking. Process through the Dutch Embassy in Cairo. Apply 4–12 weeks before travel.",
+    locations: [
+      { city: "Cairo", mapUrl: "https://www.google.com/maps/search/VFS+Global+Netherlands+Visa+Cairo+Egypt" },
+      { city: "Alexandria", mapUrl: "https://www.google.com/maps/search/VFS+Global+Netherlands+Visa+Alexandria+Egypt" },
+    ],
+    videos: {
+      form:       { url: "", thumbnail: "" },
+      motivation: { url: "", thumbnail: "" },
+      itinerary:  { url: "", thumbnail: "" },
+    },
     requiredDocs: [
       "Valid Passport (3+ months beyond departure date)",
       "Schengen Visa Application Form (fully completed)",
