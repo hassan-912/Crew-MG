@@ -12,7 +12,7 @@ import TokenGeneratorForm from './components/TokenGeneratorForm';
 
 export const metadata: Metadata = {
   title: 'Generate Link — Crew-MG Admin',
-  description: 'Issue single-use training access links.',
+  description: 'Issue time-limited, multi-use training access links.',
   robots: { index: false, follow: false },
 };
 
@@ -28,9 +28,9 @@ export default function AdminPage() {
               Generate Access Link
             </h1>
             <p className="mt-3 text-sm text-slate-600 leading-relaxed">
-              Issue a single-use, time-limited magic link to a crew member.
-              The link grants one-time access to the training portal and
-              self-destructs after first use.
+              Issue a <strong>time-limited, multi-use</strong> magic link to a crew member.
+              The link grants repeated access to the training portal until its
+              expiry date passes — no single-use lockout.
             </p>
           </div>
 
@@ -41,9 +41,9 @@ export default function AdminPage() {
               <ol className="space-y-4">
                 {[
                   { step: '1', title: 'Fill the form', body: 'Enter the employee identifier and select the training category.' },
-                  { step: '2', title: 'Link is generated', body: 'A 256-bit cryptographically random token is created and stored.' },
+                  { step: '2', title: 'Link is generated', body: 'A 256-bit cryptographically random token is created and stored with your chosen expiry date.' },
                   { step: '3', title: 'Share the link', body: 'Copy and share via encrypted email or secure messaging.' },
-                  { step: '4', title: 'One-time access', body: 'The link works once. After redemption, it is permanently invalidated.' },
+                  { step: '4', title: 'Multi-use until expiry', body: 'The link can be clicked multiple times. Access is automatically revoked when the expiry timestamp passes.' },
                 ].map(({ step, title, body }) => (
                   <li key={step} className="flex gap-3">
                     <span className="flex-none flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mt-0.5">

@@ -147,8 +147,8 @@ export default function TokenGeneratorForm() {
             <span className="text-sm font-bold">Access link generated successfully</span>
           </div>
           <p className="text-xs text-emerald-600">
-            This is a <strong>single-use</strong> link. Once clicked it cannot be reused.
-            Share it via a secure channel (encrypted email, WhatsApp, etc.).
+            This is a <strong>multi-use, time-limited</strong> link. It can be clicked multiple times
+            until it expires. Share it via a secure channel (encrypted email, WhatsApp, etc.).
           </p>
           <div className="flex items-stretch gap-2">
             <input

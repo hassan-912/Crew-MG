@@ -47,7 +47,7 @@ export default function DashboardPage() {
         {categories.map((cat) => (
           <Link 
             key={cat.id} 
-            href={`/visa/${cat.id}`}
+            href={cat.id === 'schengen' ? '/schengen' : `/visa/${cat.id}`}
             className="group block relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
           >
             <div className={`absolute top-0 left-0 w-full h-1.5 ${cat.color} opacity-80 group-hover:opacity-100 transition-opacity`}></div>

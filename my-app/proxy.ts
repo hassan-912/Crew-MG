@@ -1,7 +1,7 @@
 /**
  * proxy.ts  (project root — replaces middleware.ts, Next.js 16+)
  *
- * Vercel Edge Runtime proxy for Crew-MG single-use link security.
+ * Vercel Edge Runtime proxy for Crew-MG time-limited link security.
  * The "middleware" file convention is deprecated in Next.js 16; this
  * file uses the new "proxy" convention (function renamed from
  * `middleware` → `proxy`, file renamed from `middleware.ts` → `proxy.ts`).
@@ -17,9 +17,9 @@
  *       │       └─ YES → Pass through to protected route
  *       │
  *       ├─ Has `?token=` query param?
- *       │       ├─ Call Supabase RPC `consume_token` (atomic, single-use)
+ *       │       ├─ Call Supabase RPC `consume_token` (validates expiry only)
  *       │       ├─ Valid  → Set HTTP-only session cookie → redirect to /
- *       │       └─ Invalid → redirect to /access-denied
+ *       │       └─ Invalid/Expired → redirect to /access-denied
  *       │
  *       └─ No session, no token → redirect to /access-denied
  *
@@ -130,9 +130,9 @@ async function handleTokenRedemption(
       return redirectToAccessDenied(request, 'server_error');
     }
 
-    // `consume_token` returns an empty array on failure
+    // `consume_token` returns an empty array when token is not found or expired
     if (!data || data.length === 0) {
-      return redirectToAccessDenied(request, 'token_invalid_or_used');
+      return redirectToAccessDenied(request, 'token_invalid_or_expired');
     }
 
     const tokenRow = data[0] as {
