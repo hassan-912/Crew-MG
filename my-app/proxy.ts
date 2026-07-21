@@ -92,6 +92,7 @@ function nextPassingPathname(request: NextRequest): NextResponse {
 //   admin_session cookie, not the crew_session cookie.
 // ---------------------------------------------------------------------------
 const PUBLIC_PATHS: Array<string | RegExp> = [
+  '/welcome',       // public landing page
   '/access-denied', // error page — must be public
   '/_next',         // Next.js internals
   '/favicon.ico',
@@ -169,8 +170,8 @@ export async function proxy(request: NextRequest) {
     return await handleTokenRedemption(request, rawToken);
   }
 
-  // ── 5. No session, no token → deny access ───────────────────────────────
-  return redirectToAccessDenied(request, 'no_session');
+  // ── 5. No session, no token → redirect to public welcome page ──────────
+  return NextResponse.redirect(new URL('/welcome', request.url), { status: 302 });
 }
 
 // ---------------------------------------------------------------------------
@@ -307,6 +308,9 @@ function redirectToAccessDenied(
   request: NextRequest,
   reason: string
 ): NextResponse {
+  if (reason === 'no_session') {
+    return NextResponse.redirect(new URL('/welcome', request.url), { status: 302 });
+  }
   const url = new URL('/access-denied', request.url);
   url.searchParams.set('reason', reason);
   return NextResponse.redirect(url, { status: 302 });
