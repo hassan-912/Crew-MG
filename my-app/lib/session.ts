@@ -8,9 +8,12 @@
  * it is fully compatible with both Node.js and the Vercel Edge Runtime.
  *
  * The JWT payload carries:
- *   - sub      : the magic_token id (UUID) that granted access
- *   - recipient: optional label (email / name) for display
- *   - iat / exp: standard JWT timestamps
+ *   - sub            : the magic_token id (UUID) that granted access
+ *   - recipient      : optional label (email / name) for display
+ *   - tokenExpiresAt : ISO string of the DB token's hard expiry, so
+ *                      the session cookie lifetime matches the link's
+ *                      lifespan (up to 7 days) rather than a fixed 8 h
+ *   - iat / exp      : standard JWT timestamps
  */
 
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
@@ -19,14 +22,15 @@ import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 // Constants
 // ---------------------------------------------------------------------------
 export const SESSION_COOKIE_NAME = 'crew_session';
-const SESSION_DURATION_SECONDS   = 60 * 60 * 8; // 8 hours
+export const SESSION_DURATION_SECONDS = 60 * 60 * 8; // 8 hours
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 export interface SessionPayload extends JWTPayload {
-  sub:        string;   // magic_token id
-  recipient?: string;   // optional display name / email
+  sub:             string;   // magic_token id
+  recipient?:      string;   // optional display name / email
+  tokenExpiresAt?: string;   // ISO-8601 of the DB row's expires_at
 }
 
 // ---------------------------------------------------------------------------
@@ -46,14 +50,31 @@ function getSecret(): Uint8Array {
 // Create a signed session JWT
 // ---------------------------------------------------------------------------
 export async function createSessionToken(payload: {
-  sub:        string;
-  recipient?: string;
+  sub:              string;
+  recipient?:       string;
+  tokenExpiresAt?:  string; // ISO-8601 from the DB row
 }): Promise<string> {
-  return new SignJWT({ recipient: payload.recipient })
+  // If the DB token has a hard expiry, cap the JWT at that date.
+  // Otherwise fall back to the default SESSION_DURATION_SECONDS.
+  let expiry: string | number;
+  if (payload.tokenExpiresAt) {
+    const expiresMs = new Date(payload.tokenExpiresAt).getTime();
+    const nowMs     = Date.now();
+    const remainingSecs = Math.floor((expiresMs - nowMs) / 1000);
+    // Guard: if somehow already expired, fall back to 60 s (will be rejected on next check)
+    expiry = remainingSecs > 0 ? `${remainingSecs}s` : '60s';
+  } else {
+    expiry = `${SESSION_DURATION_SECONDS}s`;
+  }
+
+  return new SignJWT({
+    recipient:      payload.recipient,
+    tokenExpiresAt: payload.tokenExpiresAt,
+  })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(payload.sub)
     .setIssuedAt()
-    .setExpirationTime(`${SESSION_DURATION_SECONDS}s`)
+    .setExpirationTime(expiry)
     .setIssuer('crew-mg')
     .setAudience('crew-mg')
     .sign(getSecret());
@@ -79,7 +100,13 @@ export async function verifySessionToken(
 // ---------------------------------------------------------------------------
 // Cookie options (used both in middleware and Server Actions)
 // ---------------------------------------------------------------------------
-export function getSessionCookieOptions(): {
+/**
+ * @param maxAgeOverride  If provided (seconds), overrides the default
+ *   SESSION_DURATION_SECONDS.  Pass the remaining seconds until the
+ *   DB token's expires_at so the browser cookie tracks the link's
+ *   real lifespan.
+ */
+export function getSessionCookieOptions(maxAgeOverride?: number): {
   httpOnly: boolean;
   secure:   boolean;
   sameSite: 'lax' | 'strict' | 'none';
@@ -91,6 +118,16 @@ export function getSessionCookieOptions(): {
     secure:   process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path:     '/',
-    maxAge:   SESSION_DURATION_SECONDS,
+    maxAge:   maxAgeOverride ?? SESSION_DURATION_SECONDS,
   };
+}
+
+/**
+ * Derive the cookie maxAge (seconds) from the token's hard expiry date.
+ * Clamps to a minimum of 60 s and a maximum of SESSION_DURATION_SECONDS * 5.
+ */
+export function maxAgeFromExpiry(tokenExpiresAt: string): number {
+  const expiresMs    = new Date(tokenExpiresAt).getTime();
+  const remainingSec = Math.floor((expiresMs - Date.now()) / 1000);
+  return Math.max(60, remainingSec);
 }

@@ -21,52 +21,39 @@
  * check — this layout handles its own authorization server-side.
  */
 
-import { redirect } from 'next/navigation';
-import { headers }  from 'next/headers';
-import Image        from 'next/image';
-import Link         from 'next/link';
+import { redirect }  from 'next/navigation';
+import { cookies, headers } from 'next/headers';
+import Image         from 'next/image';
+import Link          from 'next/link';
+import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_VALUE } from '@/lib/adminConstants';
+import { logoutAdmin } from '@/app/actions/adminAuth';
 
 // ---------------------------------------------------------------------------
-// Auth guard — swap this function body when connecting Supabase Auth
+// Auth guard
+//
+// The proxy (proxy.ts) forwards the current pathname as an `x-pathname`
+// request header so this server-side layout can read it without needing
+// a client component or URL parsing tricks.
+//
+// Why we need this: AdminLayout wraps EVERY route under /admin/ —
+// including /admin/login itself.  Without the pathname check below,
+// an unauthenticated visitor triggers the cookie check, fails, and gets
+// redirected to /admin/login … which is wrapped by the same layout …
+// which redirects again → infinite loop (ERR_TOO_MANY_REDIRECTS).
 // ---------------------------------------------------------------------------
-async function isAdminAuthorized(): Promise<boolean> {
-  /**
-   * Current implementation: checks for a shared admin secret passed as
-   * a custom header `x-admin-token` OR as a query param `adminKey`.
-   *
-   * To secure the admin UI in production before Supabase Auth is wired:
-   *  1. Set ADMIN_SECRET in your Vercel env vars (generate with openssl rand -hex 32)
-   *  2. Share the value only with admin users
-   *  3. They access /admin?adminKey=<secret>  — the layout validates it here
-   *
-   * ⚠️  REPLACE with Supabase Auth check in Phase 4.
-   */
-  const adminSecret = process.env.ADMIN_SECRET;
+async function getAdminGuardState(): Promise<{ isLoginPage: boolean; authorized: boolean }> {
+  const headersList = await headers();
+  // x-pathname is set by nextPassingPathname() in proxy.ts
+  const pathname = headersList.get('x-pathname') ?? '';
 
-  // If no secret is set, allow access (development / initial setup mode)
-  if (!adminSecret) {
-    console.warn('[AdminLayout] ADMIN_SECRET is not set — admin access is open. Set it before going to production.');
-    return true;
+  // The login page must ALWAYS be accessible — skip the cookie check entirely
+  if (pathname === '/admin/login') {
+    return { isLoginPage: true, authorized: true };
   }
 
-  const requestHeaders = await headers();
-
-  // Check custom header (for API / programmatic access)
-  const headerToken = requestHeaders.get('x-admin-token');
-  if (headerToken === adminSecret) return true;
-
-  // Check Referer / cookie for browser sessions
-  // This is a placeholder — in Phase 4, verify Supabase session here
-  // For now, we rely on the proxy skipping /admin; local dev is open.
-  // Production should have ADMIN_SECRET set and use the header approach,
-  // or wait for Phase 4 Supabase Auth.
-
-  // PHASE 4 HOOK-IN POINT ↓↓↓
-  // const supabase = await createSupabaseServerClient();
-  // const { data: { user } } = await supabase.auth.getUser();
-  // return user?.app_metadata?.role === 'admin';
-
-  return false;
+  const cookieStore = await cookies();
+  const authorized  = cookieStore.get(ADMIN_SESSION_COOKIE)?.value === ADMIN_SESSION_VALUE;
+  return { isLoginPage: false, authorized };
 }
 
 // ---------------------------------------------------------------------------
@@ -77,10 +64,16 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const authorized = await isAdminAuthorized();
+  const { isLoginPage, authorized } = await getAdminGuardState();
+
+  // Render login page directly — no nav chrome, no auth redirect.
+  // The login page has its own full-screen layout.
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (!authorized) {
-    redirect('/access-denied?reason=admin_only');
+    redirect('/admin/login');
   }
 
   return (
@@ -123,6 +116,14 @@ export default async function AdminLayout({
               >
                 ← Portal
               </Link>
+              <form action={logoutAdmin}>
+                <button
+                  type="submit"
+                  className="text-xs font-semibold text-red-400/70 hover:text-red-400 transition-colors border border-red-400/20 hover:border-red-400/50 rounded px-2.5 py-1"
+                >
+                  Log out
+                </button>
+              </form>
             </nav>
           </div>
         </div>
