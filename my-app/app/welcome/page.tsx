@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Welcome — Crew-MG Training Portal',
@@ -63,9 +64,17 @@ export default function WelcomePage() {
           </div>
         </div>
 
-        <p className="mt-8 text-xs text-slate-500">
-          Crew-MG Internal Systems &copy; {new Date().getFullYear()} &bull; All Rights Reserved
-        </p>
+        <div className="mt-8 flex flex-col items-center space-y-3">
+          <p className="text-xs text-slate-500">
+            Crew-MG Internal Systems &copy; {new Date().getFullYear()} &bull; All Rights Reserved
+          </p>
+          <Link 
+            href="/admin" 
+            className="text-[11px] text-slate-600 hover:text-slate-400 transition-colors duration-200"
+          >
+            Admin Login
+          </Link>
+        </div>
       </div>
     </div>
   );

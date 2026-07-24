@@ -77,7 +77,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-[#0f0c29] flex flex-col">
       {/* Admin sub-header */}
       <div className="bg-[#0f0c29] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

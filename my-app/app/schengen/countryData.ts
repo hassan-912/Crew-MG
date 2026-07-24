@@ -3,7 +3,7 @@ export interface Location { city: string; mapUrl: string; }
 export interface VideoEntry { url: string; thumbnail: string; }
 export interface Videos { form: VideoEntry; motivation: VideoEntry; itinerary: VideoEntry; }
 export interface CountryData {
-  id: string; name: string; flag: string;
+  id: string; name: string; flag: string; flagUrl: string;
   agency: string; agencyColor: string;
   quickLinks: QuickLink[];
   locations: Location[];
@@ -14,7 +14,7 @@ export interface CountryData {
 
 export const COUNTRIES: CountryData[] = [
   {
-    id: "spain", name: "Spain", flag: "🇪🇸",
+    id: "spain", name: "Spain", flag: "🇪🇸", flagUrl: "https://flagcdn.com/es.svg",
     agency: "BLS International", agencyColor: "bg-red-100 text-red-700 border-red-200",
     quickLinks: [
       { label: "Official Checklist", url: "https://www.exteriores.gob.es/Consulados/cairo/en/ServiciosConsulares/Pages/index.aspx?ver=2", icon: "list" },
@@ -55,7 +55,7 @@ export const COUNTRIES: CountryData[] = [
     ],
   },
   {
-    id: "france", name: "France", flag: "🇫🇷",
+    id: "france", name: "France", flag: "🇫🇷", flagUrl: "https://flagcdn.com/fr.svg",
     agency: "TLScontact", agencyColor: "bg-blue-100 text-blue-700 border-blue-200",
     quickLinks: [
       { label: "Official Checklist", url: "https://france-visas.gouv.fr/en/web/france-visas/short-stay-visa", icon: "list" },
@@ -95,7 +95,7 @@ export const COUNTRIES: CountryData[] = [
     ],
   },
   {
-    id: "germany", name: "Germany", flag: "🇩🇪",
+    id: "germany", name: "Germany", flag: "🇩🇪", flagUrl: "https://flagcdn.com/de.svg",
     agency: "TLScontact", agencyColor: "bg-blue-100 text-blue-700 border-blue-200",
     quickLinks: [
       { label: "Official Checklist", url: "https://cairo.diplo.de/eg-en/service/visa-einreise/schengen-visa/2291040", icon: "list" },
@@ -137,7 +137,7 @@ export const COUNTRIES: CountryData[] = [
     ],
   },
   {
-    id: "italy", name: "Italy", flag: "🇮🇹",
+    id: "italy", name: "Italy", flag: "🇮🇹", flagUrl: "https://flagcdn.com/it.svg",
     agency: "Almaviva / VFS Global", agencyColor: "bg-emerald-100 text-emerald-700 border-emerald-200",
     quickLinks: [
       { label: "Official Checklist", url: "https://vistoperitalia.esteri.it/home/en", icon: "list" },
@@ -180,7 +180,7 @@ export const COUNTRIES: CountryData[] = [
     ],
   },
   {
-    id: "netherlands", name: "Netherlands", flag: "🇳🇱",
+    id: "netherlands", name: "Netherlands", flag: "🇳🇱", flagUrl: "https://flagcdn.com/nl.svg",
     agency: "VFS Global", agencyColor: "bg-orange-100 text-orange-700 border-orange-200",
     quickLinks: [
       { label: "Official Checklist", url: "https://www.netherlandsworldwide.nl/visas-for-the-netherlands/schengen-visa", icon: "list" },

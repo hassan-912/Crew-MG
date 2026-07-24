@@ -57,62 +57,62 @@ export default function TokenGeneratorForm() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 sm:p-10 shadow-2xl space-y-8">
       <form action={formAction} className="space-y-6">
 
         {/* Recipient */}
         <div>
-          <label htmlFor="recipient" className="block text-sm font-semibold text-slate-700 mb-1.5">
-            Employee Email / Identifier <span className="text-red-500" aria-hidden>*</span>
+          <label htmlFor="recipient" className="block text-sm font-semibold text-slate-300 mb-1.5">
+            Employee Email / Identifier <span className="text-red-400" aria-hidden>*</span>
           </label>
           <input
             id="recipient" name="recipient" type="text" required
             placeholder="e.g. john.smith@airline.com or EMP-1042"
             disabled={isPending}
-            className="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm placeholder:text-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-slate-50 disabled:text-slate-500 transition-all"
+            className="block w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none disabled:bg-white/5 disabled:text-slate-500 transition-all"
           />
-          <p className="mt-1.5 text-xs text-slate-500">Stored in the database for audit purposes only.</p>
+          <p className="mt-1.5 text-xs text-slate-400">Stored in the database for audit purposes only.</p>
         </div>
 
         {/* Category */}
         <div>
-          <label htmlFor="category" className="block text-sm font-semibold text-slate-700 mb-1.5">
-            Training Category <span className="text-red-500" aria-hidden>*</span>
+          <label htmlFor="category" className="block text-sm font-semibold text-slate-300 mb-1.5">
+            Training Category <span className="text-red-400" aria-hidden>*</span>
           </label>
           <div className="relative">
             <select
               id="category" name="category" required defaultValue="" disabled={isPending}
-              className="block w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-slate-50 transition-all"
+              className="block w-full appearance-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-10 text-sm text-white shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none disabled:bg-white/5 transition-all [&>option]:bg-[#0f0c29]"
             >
               <option value="" disabled>Select a visa region…</option>
               {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-              <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </div>
         </div>
 
         {/* Expiry */}
         <div>
-          <label htmlFor="expiresInHours" className="block text-sm font-semibold text-slate-700 mb-1.5">Link Expiry</label>
+          <label htmlFor="expiresInHours" className="block text-sm font-semibold text-slate-300 mb-1.5">Link Expiry</label>
           <div className="relative">
             <select
               id="expiresInHours" name="expiresInHours" defaultValue="168" disabled={isPending}
-              className="block w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-slate-50 transition-all"
+              className="block w-full appearance-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-10 text-sm text-white shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none disabled:bg-white/5 transition-all [&>option]:bg-[#0f0c29]"
             >
               {EXPIRY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-              <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </div>
         </div>
 
         {/* Error banner */}
         {state.status === 'error' && (
-          <div role="alert" className="flex items-start gap-3 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-            <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <div role="alert" className="flex items-start gap-3 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+            <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <span>{state.message}</span>
           </div>
         )}
@@ -120,7 +120,7 @@ export default function TokenGeneratorForm() {
         {/* Submit */}
         <button
           type="submit" disabled={isPending}
-          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-blue-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-indigo-500 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
         >
           {isPending ? (
             <>
@@ -141,12 +141,12 @@ export default function TokenGeneratorForm() {
 
       {/* Success: generated URL box */}
       {state.status === 'success' && (
-        <div role="status" aria-live="polite" className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 space-y-4">
-          <div className="flex items-center gap-2 text-emerald-700">
-            <svg className="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <div role="status" aria-live="polite" className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-6 space-y-4">
+          <div className="flex items-center gap-2 text-emerald-400">
+            <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <span className="text-sm font-bold">Access link generated successfully</span>
           </div>
-          <p className="text-xs text-emerald-600">
+          <p className="text-xs text-emerald-300">
             This is a <strong>multi-use, time-limited</strong> link. It can be clicked multiple times
             until it expires. Share it via a secure channel (encrypted email, WhatsApp, etc.).
           </p>
@@ -158,18 +158,18 @@ export default function TokenGeneratorForm() {
               readOnly
               value={state.accessUrl}
               onClick={(e) => (e.target as HTMLInputElement).select()}
-              className="flex-1 min-w-0 rounded-xl border border-emerald-300 bg-white px-4 py-3 font-mono text-xs text-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none cursor-pointer"
+              className="flex-1 min-w-0 rounded-xl border border-emerald-500/20 bg-white/5 px-4 py-3 font-mono text-xs text-emerald-100 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none cursor-pointer"
             />
             <button
               type="button"
               onClick={handleCopy}
-              className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-3 text-xs font-bold text-white hover:bg-emerald-700 active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 transition-all"
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-3 text-xs font-bold text-white hover:bg-emerald-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 transition-all"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
               Copy
             </button>
           </div>
-          <p className="text-xs text-emerald-600/70 font-mono">Token ID: {state.tokenId}</p>
+          <p className="text-xs text-emerald-400/70 font-mono">Token ID: {state.tokenId}</p>
         </div>
       )}
     </div>

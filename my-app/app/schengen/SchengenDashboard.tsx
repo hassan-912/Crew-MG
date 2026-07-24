@@ -90,32 +90,32 @@ function UdemyCard({ media, title, subtitle, tags, onClick, className = "" }: Ud
       onKeyDown={onClick ? (e) => e.key === "Enter" && onClick() : undefined}
       onClick={onClick}
       className={`
-        flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden
+        flex flex-col bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden
         hover:shadow-xl hover:-translate-y-1 transition-all duration-300
         ${onClick ? "cursor-pointer" : ""}
         ${className}
       `}
     >
       {/* ── Top: Media ─────────────────────────────────────── */}
-      <div className="w-full aspect-video overflow-hidden">
+      <div className="w-full">
         {media}
       </div>
 
       {/* ── Middle: Title ──────────────────────────────────── */}
       <div className="p-5 flex-1 flex flex-col justify-center">
-        <h3 className="text-base font-extrabold text-slate-900 leading-snug line-clamp-2">{title}</h3>
-        {subtitle && <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">{subtitle}</p>}
+        <h3 className="text-base font-extrabold text-white leading-snug line-clamp-2">{title}</h3>
+        {subtitle && <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">{subtitle}</p>}
       </div>
 
       {/* ── Bottom: Tags ───────────────────────────────────── */}
-      <div className="px-5 pb-5 pt-0 border-t border-slate-100">
+      <div className="px-5 pb-5 pt-0 border-t border-white/10">
         <div className="flex flex-wrap gap-2 pt-4">
           {tags.map((tag, i) => {
             const TagIcon = tag.icon;
             return (
               <span
                 key={i}
-                className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full"
+                className="inline-flex items-center gap-1 text-xs font-medium text-slate-300 bg-white/10 border border-white/20 px-2.5 py-1 rounded-full"
               >
                 {TagIcon && <TagIcon size={11} className="text-slate-400 flex-shrink-0" />}
                 {tag.label}
@@ -131,19 +131,13 @@ function UdemyCard({ media, title, subtitle, tags, onClick, className = "" }: Ud
 // ─── Country gradient media block ─────────────────────────────────────────────
 
 function CountryMediaBlock({ country }: { country: CountryData }) {
-  const gradient = COUNTRY_GRADIENT[country.id] ?? "from-indigo-500 to-purple-600";
   return (
-    <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center relative overflow-hidden`}>
-      {/* Subtle grid pattern */}
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px)",
-          backgroundSize: "28px 28px",
-        }}
+    <div className="w-full relative">
+      <img 
+        src={country.flagUrl} 
+        alt={`${country.name} flag`} 
+        className="w-full h-32 object-cover rounded-t-2xl" 
       />
-      <span className="relative z-10 text-8xl drop-shadow-2xl select-none">{country.flag}</span>
     </div>
   );
 }
@@ -256,13 +250,13 @@ function CountryGrid({ setActiveView }: { setActiveView: (v: string) => void }) 
   return (
     <div className="space-y-6">
       {/* Section header */}
-      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 flex items-start gap-4">
-        <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-          <Globe size={20} className="text-indigo-600" />
+      <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-5 flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+          <Globe size={20} className="text-indigo-400" />
         </div>
         <div>
-          <h2 className="font-bold text-indigo-900 text-base">Country Visa Guides</h2>
-          <p className="text-indigo-700 text-sm mt-1 leading-relaxed">
+          <h2 className="font-bold text-indigo-100 text-base">Country Visa Guides</h2>
+          <p className="text-indigo-200/80 text-sm mt-1 leading-relaxed">
             Select a destination to view the complete visa application guide, required documents, and video walkthroughs.
           </p>
         </div>
@@ -308,14 +302,14 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-indigo-300 flex-shrink-0">
           {icon}
         </div>
         <div>
-          <h3 className="text-base font-bold text-slate-800">{title}</h3>
-          {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+          <h3 className="text-base font-bold text-white">{title}</h3>
+          {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
         </div>
       </div>
       {children}
@@ -328,13 +322,13 @@ function SectionCard({
 function BasicsContent() {
   return (
     <div className="space-y-6">
-      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 flex items-start gap-4">
-        <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-          <Layers size={20} className="text-indigo-600" />
+      <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-5 flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+          <Layers size={20} className="text-indigo-400" />
         </div>
         <div>
-          <h2 className="font-bold text-indigo-900 text-base">Common Tasks — All Schengen Countries</h2>
-          <p className="text-indigo-700 text-sm mt-1 leading-relaxed">
+          <h2 className="font-bold text-indigo-100 text-base">Common Tasks — All Schengen Countries</h2>
+          <p className="text-indigo-200/80 text-sm mt-1 leading-relaxed">
             Complete these steps first. They apply identically regardless of your destination country.
           </p>
         </div>
@@ -354,15 +348,15 @@ function BasicsContent() {
             />
             {/* Status tags */}
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-300 bg-white/10 border border-white/20 px-2.5 py-1 rounded-full">
                 <Film size={11} className="text-slate-400" />Tutorial
               </span>
               {card.video.url ? (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
                   <Play size={11} className="text-emerald-500" />Ready to watch
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">
                   <Play size={11} className="text-slate-300" />Video coming soon
                 </span>
               )}
@@ -374,7 +368,7 @@ function BasicsContent() {
       {/* Booking links below the cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {BASICS.map((card) => (
-          <div key={card.id + "-links"} className="bg-white border border-slate-200 rounded-xl p-4">
+          <div key={card.id + "-links"} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
               <ExternalLink size={11} /> Quick links — {card.title}
             </p>
@@ -385,7 +379,7 @@ function BasicsContent() {
                   href={l.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 group"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-slate-300 hover:bg-indigo-500/20 hover:border-indigo-500/30 hover:text-white shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 group"
                 >
                   <ExternalLink size={11} className="text-slate-400 group-hover:text-indigo-500" />
                   {l.label}
@@ -460,14 +454,14 @@ function CountryContent({
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 px-4 py-2 rounded-xl transition-all duration-200"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-300 hover:text-white bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 px-4 py-2 rounded-xl transition-all duration-200"
       >
         <ArrowLeft size={15} />
         Back to All Courses
       </button>
 
       {/* Country header */}
-      <div className="flex flex-wrap items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-wrap items-center gap-4 p-5 bg-white/5 rounded-2xl border border-white/10 shadow-sm">
         <span className="text-5xl">{country.flag}</span>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-3 mb-1">
@@ -485,7 +479,7 @@ function CountryContent({
               href={loc.mapUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all duration-200"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all duration-200"
             >
               <MapPin size={11} />{loc.city}
             </a>
@@ -510,13 +504,13 @@ function CountryContent({
                 href={loc.mapUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-3 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 hover:bg-indigo-600 hover:border-indigo-600 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+                className="group flex items-center gap-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-4 py-3 hover:bg-indigo-600 hover:border-indigo-600 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
               >
-                <div className="w-8 h-8 rounded-lg bg-indigo-100 border border-indigo-200 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 group-hover:border-white/30 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 group-hover:border-white/30 transition-colors">
                   <MapPin size={15} className="text-indigo-600 group-hover:text-white transition-colors" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-indigo-900 group-hover:text-white transition-colors">{loc.city}</p>
+                  <p className="text-sm font-bold text-indigo-100 group-hover:text-white transition-colors">{loc.city}</p>
                   <p className="text-xs text-indigo-500 group-hover:text-indigo-100 transition-colors flex items-center gap-1">
                     {country.agency} · Open in Maps
                   </p>
@@ -544,18 +538,18 @@ function CountryContent({
               <VideoPlayer url={video.url} thumbnail={video.thumbnail} title={video.title} index={i} />
               {/* Tags row */}
               <div className="flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-300 bg-white/10 border border-white/20 px-2.5 py-1 rounded-full">
                   <Timer size={11} className="text-slate-400" />~10 mins
                 </span>
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-300 bg-white/10 border border-white/20 px-2.5 py-1 rounded-full">
                   <CheckCircle2 size={11} className="text-slate-400" />Required
                 </span>
                 {video.url ? (
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
                     <Play size={11} className="text-emerald-500" />Ready to watch
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">
                     <Film size={11} className="text-slate-300" />Video coming soon
                   </span>
                 )}
@@ -573,9 +567,9 @@ function CountryContent({
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {country.requiredDocs.map((doc, i) => (
-            <div key={i} className="flex items-start gap-3 bg-white border border-slate-100 rounded-xl px-4 py-3 hover:border-emerald-200 hover:bg-emerald-50/30 transition-colors group">
+            <div key={i} className="flex items-start gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3 hover:border-emerald-500/40 hover:bg-emerald-500/10 transition-colors group">
               <CheckCircle2 size={15} className="text-emerald-500 mt-0.5 flex-shrink-0 group-hover:text-emerald-600" />
-              <span className="text-sm text-slate-700 leading-snug">{doc}</span>
+              <span className="text-sm text-slate-300 leading-snug">{doc}</span>
             </div>
           ))}
         </div>
@@ -587,17 +581,17 @@ function CountryContent({
         title="Submission Order"
         subtitle="Stack papers in this exact order"
       >
-        <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl p-3 mb-4">
+        <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-3 mb-4">
           <ChevronRight size={13} className="text-indigo-500 flex-shrink-0" />
           <p className="text-xs text-indigo-700 font-medium">Document #1 goes on top; each one underneath the previous.</p>
         </div>
         <ol className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {country.arrangement.map((step, i) => (
-            <li key={i} className="flex items-start gap-3 bg-white border border-slate-100 rounded-xl px-4 py-3 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors group">
+            <li key={i} className="flex items-start gap-3 bg-white border border-slate-100 rounded-xl px-4 py-3 hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-colors group">
               <div className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                 {i + 1}
               </div>
-              <span className="text-sm text-slate-700 leading-snug">{step}</span>
+              <span className="text-sm text-slate-300 leading-snug">{step}</span>
             </li>
           ))}
         </ol>
@@ -619,7 +613,7 @@ function Sidebar({
   const isHome   = activeView === "home";
 
   return (
-    <nav className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <nav className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm overflow-hidden">
       {/* Sidebar header */}
       <div className="bg-gradient-to-r from-[#0f0c29] to-[#302b63] px-4 py-4">
         <div className="flex items-center gap-2">
@@ -637,11 +631,11 @@ function Sidebar({
           className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
             isBasics
               ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30"
-              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+              : "text-slate-300 hover:bg-white/10 hover:text-white"
           }`}
         >
-          <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${isBasics ? "bg-white/20" : "bg-indigo-100"}`}>
-            <BookOpen size={14} className={isBasics ? "text-white" : "text-indigo-600"} />
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${isBasics ? "bg-white/20" : "bg-white/10"}`}>
+            <BookOpen size={14} className={isBasics ? "text-white" : "text-slate-300"} />
           </div>
           <span className="text-left leading-snug">Schengen Basics</span>
           {isBasics && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />}
@@ -649,7 +643,7 @@ function Sidebar({
       </div>
 
       {/* Divider */}
-      <div className="mx-4 border-t border-slate-100" />
+      <div className="mx-4 border-t border-white/10" />
 
       {/* Section 2: Country Guides */}
       <div className="p-3">
@@ -662,11 +656,11 @@ function Sidebar({
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 mb-1 ${
             isHome
               ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30"
-              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+              : "text-slate-300 hover:bg-white/10 hover:text-white"
           }`}
         >
-          <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${isHome ? "bg-white/20" : "bg-indigo-100"}`}>
-            <Globe size={14} className={isHome ? "text-white" : "text-indigo-600"} />
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${isHome ? "bg-white/20" : "bg-white/10"}`}>
+            <Globe size={14} className={isHome ? "text-white" : "text-slate-300"} />
           </div>
           <span className="text-left">All Countries</span>
           {isHome && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />}
@@ -683,7 +677,7 @@ function Sidebar({
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                   isActive
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    : "text-slate-300 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 <span className="text-lg flex-shrink-0">{c.flag}</span>
@@ -696,7 +690,7 @@ function Sidebar({
       </div>
 
       {/* Progress indicator */}
-      <div className="mx-4 mb-4 mt-1 border-t border-slate-100 pt-4">
+      <div className="mx-4 mb-4 mt-1 border-t border-white/10 pt-4">
         <p className="text-xs text-slate-400 text-center">6 modules available</p>
       </div>
     </nav>
@@ -712,7 +706,7 @@ export default function SchengenDashboard() {
   const activeCountry = COUNTRIES.find((c) => c.id === activeView) ?? null;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#0f0c29]">
 
       {/* ── Dark hero banner ── */}
       <div className="bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white">

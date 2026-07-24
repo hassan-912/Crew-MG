@@ -25,6 +25,7 @@ interface Region {
   description: string;
   href:        string;
   gradient:    string;
+  flagUrl:     string;
   tags:        string[];
   available:   boolean;
 }
@@ -37,6 +38,7 @@ const REGIONS: Region[] = [
     description: 'Insurance, hotel & flight basics + country-specific guides for Spain, France, Germany, Italy, and the Netherlands.',
     href:        '/schengen',
     gradient:    'from-blue-600 via-indigo-500 to-violet-600',
+    flagUrl:     'https://flagcdn.com/eu.svg',
     tags:        ['5 Countries', 'Insurance', 'Document Checklist'],
     available:   true,
   },
@@ -47,6 +49,7 @@ const REGIONS: Region[] = [
     description: 'DS-160, B1/B2 visa interview preparation, ESTA, and embassy appointment booking walkthroughs.',
     href:        '/visa/usa',
     gradient:    'from-red-600 via-rose-500 to-red-700',
+    flagUrl:     'https://flagcdn.com/us.svg',
     tags:        ['DS-160', 'B1/B2 Visa', 'ESTA'],
     available:   false,
   },
@@ -57,6 +60,7 @@ const REGIONS: Region[] = [
     description: 'Standard Visitor Visa, IHS surcharge, biometrics, and online UK Visas & Immigration portal guide.',
     href:        '/visa/uk',
     gradient:    'from-indigo-700 via-blue-800 to-slate-800',
+    flagUrl:     'https://flagcdn.com/gb.svg',
     tags:        ['Standard Visitor', 'Biometrics', 'UKVI Portal'],
     available:   false,
   },
@@ -67,6 +71,7 @@ const REGIONS: Region[] = [
     description: 'TRV (Temporary Resident Visa), eTA, IRCC portal, medical examination, and biometrics requirements.',
     href:        '/visa/canada',
     gradient:    'from-red-500 via-red-600 to-rose-700',
+    flagUrl:     'https://flagcdn.com/ca.svg',
     tags:        ['TRV / eTA', 'IRCC Portal', 'Medical Exam'],
     available:   false,
   },
@@ -76,29 +81,16 @@ const REGIONS: Region[] = [
 
 function RegionMedia({ region }: { region: Region }) {
   return (
-    <div
-      className={`
-        w-full h-full bg-gradient-to-br ${region.gradient}
-        flex items-center justify-center relative overflow-hidden
-      `}
-    >
-      {/* Grid pattern overlay */}
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),' +
-            'linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px)',
-          backgroundSize: '28px 28px',
-        }}
-      />
+    <div className="w-full relative">
       {/* Flag */}
-      <span className="relative z-10 text-8xl drop-shadow-2xl select-none">
-        {region.flag}
-      </span>
+      <img
+        src={region.flagUrl}
+        alt={`${region.name} flag`}
+        className="w-full h-32 object-cover rounded-t-2xl"
+      />
       {/* "Coming Soon" ribbon */}
       {!region.available && (
-        <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border border-white/20">
+        <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border border-white/20 z-10">
           Coming Soon
         </div>
       )}
@@ -112,7 +104,7 @@ function RegionCard({ region }: { region: Region }) {
   const card = (
     <div
       className={`
-        flex flex-col bg-white border border-slate-200 rounded-2xl overflow-hidden
+        flex flex-col bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden
         shadow-sm transition-all duration-300
         ${region.available
           ? 'hover:shadow-2xl hover:-translate-y-1.5 cursor-pointer'
@@ -121,33 +113,33 @@ function RegionCard({ region }: { region: Region }) {
       `}
     >
       {/* Media */}
-      <div className="w-full aspect-video overflow-hidden">
+      <div className="w-full">
         <RegionMedia region={region} />
       </div>
 
       {/* Title + description */}
       <div className="p-5 flex-1 flex flex-col">
-        <h2 className="text-lg font-extrabold text-slate-900 leading-snug">
+        <h2 className="text-lg font-extrabold text-white leading-snug">
           {region.name}
         </h2>
-        <p className="mt-2 text-xs text-slate-500 leading-relaxed flex-1">
+        <p className="mt-2 text-xs text-slate-400 leading-relaxed flex-1">
           {region.description}
         </p>
       </div>
 
       {/* Tags footer */}
-      <div className="px-5 pb-5 pt-0 border-t border-slate-100">
+      <div className="px-5 pb-5 pt-0 border-t border-white/10">
         <div className="flex flex-wrap gap-2 pt-4">
           {region.tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full"
+              className="inline-flex items-center gap-1 text-xs font-medium text-slate-300 bg-white/10 border border-white/20 px-2.5 py-1 rounded-full"
             >
               {tag}
             </span>
           ))}
           {region.available && (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full ml-auto">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full ml-auto">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Live
             </span>
@@ -188,7 +180,7 @@ export default function RegionHubPage() {
       </div>
 
       {/* Card grid */}
-      <div className="flex-1 bg-slate-50 py-14 px-4">
+      <div className="flex-1 bg-[#0f0c29] py-14 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {REGIONS.map((region) => (

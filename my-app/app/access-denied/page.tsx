@@ -21,29 +21,29 @@ export const metadata: Metadata = {
 const REASONS: Record<string, { heading: string; body: string }> = {
   no_session: {
     heading: 'Session Required',
-    body:    'Please use the secure link sent to you by your training administrator.',
+    body: 'Please use the secure link sent to you by your training administrator.',
   },
   token_invalid_or_used: {
     heading: 'Link Already Used or Expired',
-    body:    'This link is single-use and has already been redeemed, or it has expired. Please contact your administrator to request a new link.',
+    body: 'This link is single-use and has already been redeemed, or it has expired. Please contact your administrator to request a new link.',
   },
   invalid_format: {
     heading: 'Invalid Link',
-    body:    'The link you followed appears to be malformed. Please check you copied the full URL and try again.',
+    body: 'The link you followed appears to be malformed. Please check you copied the full URL and try again.',
   },
   server_error: {
-    heading: 'Temporary Error',
-    body:    'We were unable to validate your access link right now. Please try again in a few moments.',
+    heading: 'We are enhancing our system, please try again later',
+    body: 'We were unable to validate your access link right now. Please try again in a few moments.',
   },
   admin_only: {
     heading: 'Admin Access Required',
-    body:    'This area is restricted to Crew-MG administrators. If you are an admin, ensure your credentials are correct.',
+    body: 'This area is restricted to Crew-MG administrators. If you are an admin, ensure your credentials are correct.',
   },
 };
 
 const DEFAULT_REASON = {
   heading: 'Access Denied',
-  body:    'You are not authorised to view this page.',
+  body: 'You are not authorised to view this page.',
 };
 
 interface Props {
@@ -52,28 +52,28 @@ interface Props {
 
 export default async function AccessDeniedPage({ searchParams }: Props) {
   const { reason } = await searchParams;
-  const copy       = (reason ? REASONS[reason] : undefined) ?? DEFAULT_REASON;
+  const copy = (reason ? REASONS[reason] : undefined) ?? DEFAULT_REASON;
 
   return (
     <main
       style={{
-        minHeight:       '100dvh',
-        display:         'flex',
-        flexDirection:   'column',
-        alignItems:      'center',
-        justifyContent:  'center',
-        padding:         '2rem',
-        background:      'linear-gradient(135deg, #0f0c29, #302b63, #24243e)',
-        color:           '#f8fafc',
-        fontFamily:      'system-ui, sans-serif',
-        textAlign:       'center',
+        minHeight: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        background: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)',
+        color: '#f8fafc',
+        fontFamily: 'system-ui, sans-serif',
+        textAlign: 'center',
       }}
     >
       {/* Logo */}
       <div className="mb-6" aria-hidden>
-        <img 
-          src="/MG%20W.svg" 
-          alt="Crew-MG Logo" 
+        <img
+          src="/MG%20W.svg"
+          alt="Crew-MG Logo"
           className="h-16 w-auto object-contain mx-auto drop-shadow-lg"
         />
       </div>
@@ -81,10 +81,10 @@ export default async function AccessDeniedPage({ searchParams }: Props) {
       {/* Heading */}
       <h1
         style={{
-          fontSize:    'clamp(1.75rem, 4vw, 2.5rem)',
-          fontWeight:  700,
-          margin:      '0 0 1rem',
-          color:       '#fca5a5',
+          fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+          fontWeight: 700,
+          margin: '0 0 1rem',
+          color: '#fca5a5',
         }}
       >
         {copy.heading}
@@ -93,11 +93,11 @@ export default async function AccessDeniedPage({ searchParams }: Props) {
       {/* Body */}
       <p
         style={{
-          maxWidth:    '480px',
-          lineHeight:  1.7,
-          color:       '#cbd5e1',
-          fontSize:    '1rem',
-          margin:      '0 0 2.5rem',
+          maxWidth: '480px',
+          lineHeight: 1.7,
+          color: '#cbd5e1',
+          fontSize: '1rem',
+          margin: '0 0 2.5rem',
         }}
       >
         {copy.body}
